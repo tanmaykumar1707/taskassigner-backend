@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -24,6 +25,14 @@ public class GatewayConfig {
     @Autowired
     private AuthenticationFilter authenticationFilter;
 
+
+    //tracking the circuit breakser  actuator endpoint http://localhost:8003/actuator/circuitbreakerevents/taskUserCircuitBreaker
+    //http://localhost:8003/actuator/circuitbreakers
+    // three states of circuite breaker
+    //CLOSED   , OPEN , HALF_OPEN - When service is down , state will go closed to open and accoding config it will half open and then open or close again
+
+
+
     @Bean
     public RouteLocator routeLocator(RouteLocatorBuilder routeLocatorBuilder){
 
@@ -33,8 +42,10 @@ public class GatewayConfig {
                 .filters(
                         f -> f
                                .rewritePath("/api/taskassigner/(?<segment>.*)", "/api/${segment}")
-                                .addRequestHeader("X-Current-Auditor","automaticDetected")
                                 .addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+                                .circuitBreaker(config->config.setName("taskUserCircuitBreaker")
+                                                .setFallbackUri("forward:/fallback").addStatusCode("INTERNAL_SERVER_ERROR")
+                                        )
 
                         ) .uri("lb://TASKUSERS"))
               .route("taskservice",p -> p
@@ -43,8 +54,9 @@ public class GatewayConfig {
                         f -> f
                                 .rewritePath("/api/taskassigner/(?<segment>.*)", "/api/${segment}")
                                 .addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
-                        //.circuitBreaker(config -> config.setName("accountsCircuitBreaker")
-                        //      .setFallbackUri("forward:/contactSupport")
+                                .circuitBreaker(config->config.setName("taskServiceCircuitBreaker")
+                                        .setFallbackUri("forward:/fallback").addStatusCode("INTERNAL_SERVER_ERROR")
+                                )
 
                 )
                 .uri("lb://TASKSERVICE")).build();
@@ -54,7 +66,7 @@ public class GatewayConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOrigin("http://localhost:3000"); // Replace with your specific frontend origin
+        corsConfig.addAllowedOrigin("http://localhost:3000"); //Need to Replace with your specific frontend origin
         corsConfig.addAllowedMethod("*");
         corsConfig.addAllowedHeader("*");
         corsConfig.setAllowCredentials(true); // Optional: Allow credentials (cookies, authorization headers)
