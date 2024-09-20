@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "taskusers")
+@FeignClient(name = "taskusers",fallback = UsersFallback.class)
 public interface UserFeignClient {
 
     @GetMapping(value = "/api/users/{id}",consumes = "application/json")

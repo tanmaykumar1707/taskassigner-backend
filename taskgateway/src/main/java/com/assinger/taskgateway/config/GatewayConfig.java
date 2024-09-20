@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
@@ -46,6 +47,8 @@ public class GatewayConfig {
                                 .circuitBreaker(config->config.setName("taskUserCircuitBreaker")
                                                 .setFallbackUri("forward:/fallback").addStatusCode("INTERNAL_SERVER_ERROR")
                                         )
+                                .retry(retryConfig -> retryConfig.setRetries(3).setMethods(HttpMethod.GET)
+                                        .setBackoff(Duration.ofMillis(100),Duration.ofMillis(1000),2,true)  )
 
                         ) .uri("lb://TASKUSERS"))
               .route("taskservice",p -> p

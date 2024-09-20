@@ -11,6 +11,7 @@ public class UsersFallback implements UserFeignClient{
 
     @Override
     public ResponseEntity<UserDto> fetchUserById(Long id, String serviceSource) {
+
         return null;
     }
 }

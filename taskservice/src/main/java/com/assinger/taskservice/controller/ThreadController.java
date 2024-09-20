@@ -5,6 +5,8 @@ import com.assinger.taskservice.constants.TaskConstants;
 import com.assinger.taskservice.dto.ResponseDto;
 import com.assinger.taskservice.dto.ThreadDto;
 import com.assinger.taskservice.service.IThreadService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ public class ThreadController {
 
     private IThreadService threadService;
 
+    @Retry(name="getALlThreads",fallbackMethod = "getAllThreadFallBack")//retry and properties added
     @GetMapping("/{taskId}/threads")
     public ResponseEntity<List<ThreadDto>> getAllThreadsByTask(@PathVariable Long taskId){
 
@@ -31,6 +34,13 @@ public class ThreadController {
         return ResponseEntity.status(HttpStatus.OK).body(threadDtoList);
     }
 
+    private ResponseEntity<List<ThreadDto>> getAllThreadFallBack(Throwable th){
+
+        return  null;
+    }
+
+
+    @RateLimiter(name="saveThreadPostRateLimit",fallbackMethod = "saveThreadFallBack")
     @PostMapping("/{taskId}/threads")
     public ResponseEntity<ResponseDto> saveThread(@PathVariable Long taskId, @Valid @RequestBody ThreadDto threadDto){
 
@@ -40,7 +50,13 @@ public class ThreadController {
                 .body(new ResponseDto(TaskConstants.STATUS_201,"THREAD ADDED SUCCESSFULLY!"));
     }
 
-    @DeleteMapping("/threads/{threadId}")
+
+    private ResponseEntity<ResponseDto> saveThreadFallBack(Throwable th) {
+        return null;
+    }
+
+
+        @DeleteMapping("/threads/{threadId}")
     public ResponseEntity<ResponseDto> deleteSingleThread(@PathVariable Long threadId){
 
         return ResponseEntity.status(HttpStatus.OK)
