@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Component("auditAwareImpl")
 @Slf4j
-public class AuditAwareImpl implements AuditorAware<String> {
+public class AuditAwareImpl implements AuditorAware<Long> {
 
     private static final ThreadLocal<Long> currentAuditor = new ThreadLocal<>();
 
@@ -28,7 +28,7 @@ public class AuditAwareImpl implements AuditorAware<String> {
         currentAuditor.remove();
     }
     @Override
-    public Optional<String> getCurrentAuditor() {
+    public Optional<Long> getCurrentAuditor() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication==null || !authentication.isAuthenticated() ||
@@ -36,8 +36,8 @@ public class AuditAwareImpl implements AuditorAware<String> {
             return Optional.empty();
         }
         CustomUserDetailsEntity usersEntity =   (CustomUserDetailsEntity) authentication.getPrincipal();
-       log.info(" auditware===>"+usersEntity.getUsername());
-        return Optional.ofNullable(usersEntity.getUserId().toString());
+         log.info(" auditware===>"+usersEntity.getUserId());
+        return Optional.ofNullable(usersEntity.getUserId());
 
        // return Optional.of("UserMicroService");
     }

@@ -24,7 +24,7 @@ public class CustomUserDetailsEntity implements UserDetails {
         this.emailId = usersEntity.getEmail();
         this.password = usersEntity.getPassword();
         this.isEnabled = usersEntity.isEnabled();
-        this.authorities = Arrays.stream(usersEntity.getRole().split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        this.authorities = Arrays.stream(usersEntity.getRole().toString().split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
         log.info("authoriteis=====>"+authorities.toString());
     }
 

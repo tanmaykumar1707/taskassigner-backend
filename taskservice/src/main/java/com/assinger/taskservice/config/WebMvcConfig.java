@@ -20,3 +20,5 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(new JwtInterceptor(jwtUtils));
     }
 }
+
+

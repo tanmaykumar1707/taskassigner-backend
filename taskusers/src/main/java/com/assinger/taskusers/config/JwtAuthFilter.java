@@ -44,12 +44,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String email=null,token=null;
-        if(authHeader!=null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            email = jwtService.extractEmailId(token);
+//        if(authHeader!=null && authHeader.startsWith("Bearer ")) {
+//            token = authHeader.substring(7);
+//            email = jwtService.extractEmailId(token);
+//
+//        }
+
+        if(authHeader!=null ) {
+           token = authHeader;
+            email = jwtService.extractEmailId(authHeader);
 
         }
-        log.info("===>"+authHeader+" " + email+ "  "+token);
+        log.info("===> email in the token :: " + email);
 
         if(email!=null  && SecurityContextHolder.getContext().getAuthentication()==null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);

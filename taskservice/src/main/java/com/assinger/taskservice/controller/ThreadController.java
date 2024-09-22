@@ -9,12 +9,15 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -22,6 +25,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @Validated
+@Slf4j
 public class ThreadController {
 
     private IThreadService threadService;
@@ -43,9 +47,13 @@ public class ThreadController {
     @RateLimiter(name="saveThreadPostRateLimit",fallbackMethod = "saveThreadFallBack")
     @PostMapping("/{taskId}/threads")
     public ResponseEntity<ResponseDto> saveThread(@PathVariable Long taskId, @Valid @RequestBody ThreadDto threadDto){
+        Instant startInstant = Instant.now();
 
         threadService.saveThread(taskId,threadDto);
+        Instant endInstant = Instant.now();
 
+        long timeElapsed =  Duration.between(startInstant,endInstant).toMillis();
+        log.info("Time Elpsed "+timeElapsed);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseDto(TaskConstants.STATUS_201,"THREAD ADDED SUCCESSFULLY!"));
     }
@@ -56,7 +64,7 @@ public class ThreadController {
     }
 
 
-        @DeleteMapping("/threads/{threadId}")
+    @DeleteMapping("/threads/{threadId}")
     public ResponseEntity<ResponseDto> deleteSingleThread(@PathVariable Long threadId){
 
         return ResponseEntity.status(HttpStatus.OK)

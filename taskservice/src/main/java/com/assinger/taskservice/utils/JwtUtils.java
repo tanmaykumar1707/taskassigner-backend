@@ -44,6 +44,11 @@ public class JwtUtils {
         return  claims.getSubject();
     }
 
+    public String extractRole(String token) {
+        final Claims claims = extractAllClaims(token);
+        return  claims.get("role").toString();
+    }
+
     public boolean isTokenvalid(String token) {
         final Claims claims = extractAllClaims(token);
 

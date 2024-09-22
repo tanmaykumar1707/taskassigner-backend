@@ -2,6 +2,7 @@ package com.assinger.taskservice.service;
 
 import com.assinger.taskservice.dto.TaskCountDto;
 import com.assinger.taskservice.dto.TaskDto;
+import com.assinger.taskservice.enums.TaskStatusEnum;
 import org.springframework.scheduling.config.Task;
 
 import java.util.List;
@@ -20,4 +21,5 @@ public interface ITaskService {
 
     TaskCountDto taskCountByStatus();
 
+    void  updateTaskStatus(Long taskId, TaskStatusEnum status);
 }

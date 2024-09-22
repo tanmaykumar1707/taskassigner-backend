@@ -92,10 +92,14 @@ public class UsersServiceImpl implements IUsersService {
 
     @Override
     public void updateUserStatus(Long userId) {
-        usersRepository.findById(userId).map(usersEntity -> {
-            usersEntity.setEnabled(!usersEntity.isEnabled());
-            return usersRepository.save(usersEntity);
-        }).orElseThrow(()->new UserNotFoundException("User Not found"));
+
+            log.info("user id for status change "+ userId);
+            usersRepository.findById(userId).map(usersEntity -> {
+                usersEntity.setEnabled(!usersEntity.isEnabled());
+                return usersRepository.save(usersEntity);
+            }).orElseThrow(()->new UserNotFoundException("User Not found"));
+
+
     }
 
     @Override

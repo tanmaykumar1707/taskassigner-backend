@@ -1,5 +1,6 @@
 package com.assinger.taskusers.entity;
 
+import com.assinger.taskusers.enums.UserRoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,7 +37,8 @@ public class UsersEntity extends BaseEntity{
     private boolean enabled;
 
     @Column(name="role")
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private UserRoleEnum role;
 
     @Column(name="lastPasswordChangedAt")
     private LocalDateTime lastPasswordChangedAt;

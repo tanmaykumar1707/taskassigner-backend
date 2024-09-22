@@ -45,7 +45,7 @@ public class GatewayConfig {
                                .rewritePath("/api/taskassigner/(?<segment>.*)", "/api/${segment}")
                                 .addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
                                 .circuitBreaker(config->config.setName("taskUserCircuitBreaker")
-                                                .setFallbackUri("forward:/fallback").addStatusCode("INTERNAL_SERVER_ERROR")
+                                                .setFallbackUri("forward:/fallback")
                                         )
                                 .retry(retryConfig -> retryConfig.setRetries(3).setMethods(HttpMethod.GET)
                                         .setBackoff(Duration.ofMillis(100),Duration.ofMillis(1000),2,true)  )

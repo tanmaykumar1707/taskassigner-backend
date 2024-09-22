@@ -3,15 +3,13 @@ package com.assinger.taskusers.controllers;
 
 import com.assinger.taskusers.config.JwtService;
 import com.assinger.taskusers.constants.UserServiceConstants;
-import com.assinger.taskusers.dto.FetchAllUsersDto;
-import com.assinger.taskusers.dto.LoginDto;
-import com.assinger.taskusers.dto.ResponseDto;
-import com.assinger.taskusers.dto.UserDto;
+import com.assinger.taskusers.dto.*;
 import com.assinger.taskusers.service.IUsersService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +34,8 @@ public class UsersController {
     private IUsersService usersService;
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
+    @Autowired
+    private DetailsInfo detailsInfo;
 
     @GetMapping
     public ResponseEntity<FetchAllUsersDto> getAllUsers(){
@@ -83,7 +83,7 @@ public class UsersController {
             String email = authentication.getName();
             log.info("authentication.details() ---> " +  authentication.getDetails()+" email "+email);
             UserDto userDto =  usersService.findUserByEmail(email);
-            String jwtToken =  jwtService.generateToken(userDto.getUserId().intValue(),email,userDto.getRole());
+            String jwtToken =  jwtService.generateToken(userDto.getUserId().intValue(),email,userDto.getRole().toString());
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ResponseDto(UserServiceConstants.STATUS_200,jwtToken ));
         }else{
@@ -96,13 +96,7 @@ public class UsersController {
     @PutMapping("/{userId}")
     public  ResponseEntity<ResponseDto> updateUser(@PathVariable Long userId , @Valid @RequestBody UserDto userDto)
     throws Exception {
-
-        Predicate<Long> emptyNullCheck = (id)-> id!=null && id!=0;
-       if(!emptyNullCheck.test(userDto.getUserId()))
-           throw  new RuntimeException("user id not found ");
-
        usersService.updateUser(userId,userDto);
-
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseDto(UserServiceConstants.STATUS_200,UserServiceConstants.USER_UPDATED_MESSAGE));
     }
@@ -127,6 +121,12 @@ public class UsersController {
         responseDto.setUsers(allUser);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 
+    }
+
+
+    @GetMapping("/info")
+    public ResponseEntity<DetailsInfo> getDetailsInfo(){
+        return ResponseEntity.ok().body(detailsInfo);
     }
 
 

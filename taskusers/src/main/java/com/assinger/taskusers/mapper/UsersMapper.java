@@ -7,11 +7,9 @@ public class UsersMapper {
 
 
     public static UsersEntity mapToUsersEntity(UsersEntity usersEntity, UserDto userDto){
-            usersEntity.setUserId(userDto.getUserId());
             usersEntity.setEmail(userDto.getEmail());
             usersEntity.setName(userDto.getName());
             usersEntity.setMobileNumner(userDto.getMobileNumber());
-            usersEntity.setEnabled(userDto.isEnabled());
             usersEntity.setRole(userDto.getRole());
             usersEntity.setPassword(userDto.getPassword());
 

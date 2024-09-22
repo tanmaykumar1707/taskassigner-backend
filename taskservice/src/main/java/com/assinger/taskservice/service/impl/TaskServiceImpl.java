@@ -1,10 +1,12 @@
 package com.assinger.taskservice.service.impl;
 
+import com.assinger.taskservice.audit.AuditAwareImpl;
 import com.assinger.taskservice.dto.TaskCountDto;
 import com.assinger.taskservice.dto.TaskDto;
 import com.assinger.taskservice.dto.UserDto;
 import com.assinger.taskservice.entity.TaskEntity;
 import com.assinger.taskservice.enums.TaskStatusEnum;
+import com.assinger.taskservice.exception.TaskNotFoundException;
 import com.assinger.taskservice.mapper.TaskMapper;
 import com.assinger.taskservice.repository.TaskRepository;
 import com.assinger.taskservice.service.ITaskService;
@@ -24,12 +26,14 @@ public class TaskServiceImpl implements ITaskService {
 
     private TaskRepository taskRepository;
     private UserFeignClient userFeignClient;
+    private AuditAwareImpl auditAware;
 
     @Override
     public void saveTask(TaskDto taskDto) {
 
         TaskEntity taskEntity = new TaskEntity();
         TaskMapper.mapToTaskEntity(taskEntity,taskDto);
+        taskEntity.setAssignedFrom(auditAware.getCurrentAuditor().get());
         taskEntity.setStatus(TaskStatusEnum.OPEN);
 
         taskRepository.save(taskEntity);
@@ -73,8 +77,20 @@ public class TaskServiceImpl implements ITaskService {
     @Override
     public void updateTasks(Long taskId, TaskDto taskDto) {
 
+        taskRepository.findById(taskId).map(taskEntity -> {
+                            taskEntity.setSubject(taskDto.getSubject());
+                            taskEntity.setAssignedToType(taskDto.getAssignedToType());
+                            taskEntity.setAssignedTo(taskDto.getAssignedTo());
+                            taskEntity.setRemarks(taskDto.getRemarks());
+
+                            return taskRepository.save(taskEntity);
+                       }   )
+                .orElseThrow(()->new TaskNotFoundException("Task not found with Id "+taskId));
+
 
     }
+
+
 
     @Override
     public String deleteTask(Long taskId) {
@@ -132,5 +148,14 @@ public class TaskServiceImpl implements ITaskService {
         }
 
         return taskCountDto;
+    }
+
+    @Override
+    public void updateTaskStatus(Long taskId, TaskStatusEnum status) {
+        taskRepository.findById(taskId).map(taskEntity -> {
+                    taskEntity.setStatus(status);
+                  return  taskRepository.save(taskEntity);
+                })
+                .orElseThrow(()-> new TaskNotFoundException("Task not found with task Id "+taskId));
     }
 }

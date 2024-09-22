@@ -1,7 +1,9 @@
 package com.assinger.taskusers.dto;
 
+import com.assinger.taskusers.enums.UserRoleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
@@ -28,8 +30,8 @@ public class UserDto extends  AuditBaseDto {
 
     private boolean enabled;
 
-    @NotEmpty(message="Role can not be null or empty")
-    private String role;
+    @NotNull(message="Role can not be null or empty")
+    private UserRoleEnum role;
 
 
 }
