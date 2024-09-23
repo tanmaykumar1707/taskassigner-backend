@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="taskeureka" />
+        <module name="comm" />
         <module name="taskservice" />
         <module name="taskgateway" />
         <module name="taskconfigserver" />
@@ -17,6 +18,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="comm" options="-parameters" />
       <module name="taskconfigserver" options="-parameters" />
       <module name="taskeureka" options="-parameters" />
       <module name="taskgateway" options="-parameters" />

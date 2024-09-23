@@ -1,6 +1,7 @@
 package com.assinger.taskusers.service.impl;
 
 import com.assinger.taskusers.dto.UserDto;
+import com.assinger.taskusers.dto.UserMqDto;
 import com.assinger.taskusers.entity.UsersEntity;
 import com.assinger.taskusers.exception.UserNotFoundException;
 import com.assinger.taskusers.mapper.UsersMapper;
@@ -9,6 +10,7 @@ import com.assinger.taskusers.service.IUsersService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,11 +27,14 @@ public class UsersServiceImpl implements IUsersService {
     private UsersRepository usersRepository;
     private PasswordEncoder passwordEncoder;
 
+    private StreamBridge streamBridge;
+
+
 //    UsersServiceImpl(UsersRepository usersRepository){
 
     @Override
     public UserDto updateUser(Long userId,UserDto userDto)  {
-        usersRepository.findById(userId).map(usersEntity ->{
+      UsersEntity saveUserEntity =   usersRepository.findById(userId).map(usersEntity ->{
 
                     usersEntity.setName(userDto.getName());
                     usersEntity.setEmail(userDto.getEmail());
@@ -38,19 +43,39 @@ public class UsersServiceImpl implements IUsersService {
                     return usersRepository.save(usersEntity);
                      }).orElseThrow(()-> new UserNotFoundException("User not found"));
 
+
         return null;
     }
 //        this.usersRepository  = usersRepository;
 //    }
 
+
+
+
+
     @Override
     public void createUser(UserDto userDto) {
         UsersEntity usersEntity = new UsersEntity();
         UsersMapper.mapToUsersEntity(usersEntity,userDto);
-        log.info("userDto mapped to Entity "+ usersEntity);
+        log.info("inside the create user and userDto mapped to Entity "+ usersEntity);
         usersEntity.setPassword(passwordEncoder.encode(usersEntity.getPassword()));
-        usersRepository.save(usersEntity);
+    UsersEntity saveUserEntity=usersRepository.save(usersEntity);
+        var userMqDto =
+                new UserMqDto(saveUserEntity.getEmail(),saveUserEntity.getMobileNumner()
+                        ,saveUserEntity.getRole().toString());
+        sendCommunication(userMqDto);
+
     }
+
+
+    private void sendCommunication(UserMqDto userMqDto){
+
+        log.info("Sending Communication request for the details: {}", userMqDto);
+        var result = streamBridge.send("sendCommunication-out-0", userMqDto);
+        log.info("Is the Communication request successfully triggered ? : {}", result);
+    }
+
+
 
         @Override
         public List<UserDto> allUsers() {

@@ -9,6 +9,7 @@
         <option value="$PROJECT_DIR$/taskgateway/pom.xml" />
         <option value="$PROJECT_DIR$/taskservice/pom.xml" />
         <option value="$PROJECT_DIR$/taskconfigserver/pom.xml" />
+        <option value="$PROJECT_DIR$/comm/pom.xml" />
       </list>
     </option>
   </component>
